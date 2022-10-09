@@ -1,0 +1,19 @@
+[package]
+name = "meticulous"
+version = "0.1.0"
+edition = "2021"
+description = "extension crate for Result to add more meaning to unwrapping"
+keywords = ["result", "unwrap", "expect", "todo", "fixme", "error", "error-handling"]
+categories = ["rust-patterns"]
+repository = "https://github.com/glebpom/meticulous"
+documentation = "https://docs.rs/meticulous"
+authors = ["Gleb Pomykalov <glebpom@gmail.com>"]
+readme = "README.md"
+license = "MIT/Apache-2.0"
+autotests = true
+
+[dependencies]
+
+[features]
+default = []
+disallow-todo-on-release = []
