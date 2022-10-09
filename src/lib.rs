@@ -105,16 +105,18 @@ where
     #[inline]
     #[track_caller]
     fn assured(self, reason: &str) -> T {
-        self.expect(&format!(
-            "the success was expected to be assured, but the error was returned: {}",
-            reason
-        ))
+        self.unwrap_or_else(|_| {
+            panic!(
+                "the success was expected to be assured, but the error was returned: {}",
+                reason
+            )
+        })
     }
 
     #[inline]
     #[track_caller]
     fn verified(self, reason: &str) -> T {
-        self.expect(&format!("the success was expected to be verified in the code earlier, but the error was returned: {}", reason))
+        self.unwrap_or_else(|_| panic!("the success was expected to be verified in the code earlier, but the error was returned: {}", reason))
     }
 }
 
