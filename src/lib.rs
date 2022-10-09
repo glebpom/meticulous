@@ -8,7 +8,10 @@
 use std::fmt::Debug;
 
 /// The extension trait for `Result`
-pub trait ResultExt<T, E> where E: Debug {
+pub trait ResultExt<T, E>
+where
+    E: Debug,
+{
     /// Returns the contained [`Ok`] value, consuming the `self` value.
     ///
     /// Use this method to indicate that it should be replaced with
@@ -83,7 +86,10 @@ pub trait ResultExt<T, E> where E: Debug {
     fn verified(self, reason: &str) -> T;
 }
 
-impl<T, E> ResultExt<T, E> for Result<T, E> where E: Debug {
+impl<T, E> ResultExt<T, E> for Result<T, E>
+where
+    E: Debug,
+{
     #[inline]
     #[track_caller]
     #[cfg(all(feature = "disallow-todo-on-release", debug_assertions = "false"))]
@@ -99,7 +105,10 @@ impl<T, E> ResultExt<T, E> for Result<T, E> where E: Debug {
     #[inline]
     #[track_caller]
     fn assured(self, reason: &str) -> T {
-        self.expect(&format!("the success was expected to be assured, but the error was returned: {}", reason))
+        self.expect(&format!(
+            "the success was expected to be assured, but the error was returned: {}",
+            reason
+        ))
     }
 
     #[inline]
@@ -117,8 +126,8 @@ mod tests {
     #[should_panic]
     fn test_todo() {
         u16::try_from(i32::MAX).todo();
-    }    
-    
+    }
+
     #[test]
     #[should_panic]
     fn test_assured() {
