@@ -79,7 +79,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: ${{ matrix.features }} ${{ matrix.test-features }} -- --test-threads=1
+          args: ${{ matrix.features }} ${{ matrix.test-features }}
 
   docs:
     name: Docs
@@ -132,11 +132,3 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --features __internal_proxy_sys_no_cache -- --test-threads=1
-
-      - name: Check minimal versions
-        run: |
-          cargo clean
-          cargo update -Z minimal-versions
-          cargo check
-          cargo check --all-features
