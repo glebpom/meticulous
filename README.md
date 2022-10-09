@@ -14,7 +14,8 @@ This crate provides extensions to `Result` type with additional unwrapping metho
 standard `expect` and `unwrap`.
 
 Different "unwrapping" cases may have different meaning. Some of them need to be fixed later, others don't. You may also
-want to easily find different types of unwrapping using a simple code search. This helps helps with that.
+want to easily find different types of unwrapping using a simple code search. Using different unwrapping methods from
+this crate helps writing and maintaining the code. 
 
 # todo
 
