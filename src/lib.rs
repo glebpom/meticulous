@@ -92,11 +92,6 @@ where
 {
     #[inline]
     #[track_caller]
-    #[cfg(all(feature = "disallow-todo-on-release", not(debug_assertions)))]
-    fn todo(self) -> T {
-        compile_error!(".todo() disallowed with debug_assertions turned off")
-    }
-
     #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     fn todo(self) -> T {
         self.expect("not yet implemented")
