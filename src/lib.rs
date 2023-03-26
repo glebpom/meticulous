@@ -1,6 +1,6 @@
 //! This crate provides extensions to [`Result`] and [`Option`] types with additional
 //! unwrapping methods, which have more meaning compared to standard
-//! [`Result::expect`]/[`Option::expect`] and [`Result::unwrap`]/[`Option::expect`].
+//! [`Result::expect`]/[`Option::expect`] and [`Result::unwrap`]/[`Option::unwrap`].
 //!
 //! See [`ResultExt`] and [`OptionExt`] docs for more info
 //!
