@@ -37,6 +37,7 @@ where
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// x.todo(); // panics with `not yet implemented: emergency failure`
     /// ```
+    #[track_caller]
     #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     fn todo(self) -> T;
 
