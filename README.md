@@ -10,7 +10,7 @@
 melticulous = "0.1.0"
 ```
 
-This crate provides extensions to `Result` type with additional unwrapping methods, which have more meaning compared to
+This crate provides extensions to `Result` and `Option` types with additional unwrapping methods, which have more meaning compared to
 standard `expect` and `unwrap`.
 
 Different "unwrapping" cases may have different meaning. Some of them need to be fixed later, others don't. You may also
