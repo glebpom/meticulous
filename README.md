@@ -7,7 +7,7 @@
 
 ```toml
 [dependencies]
-melticulous = "0.1.0"
+melticulous = "0.2.0"
 ```
 
 This crate provides extensions to `Result` and `Option` types with additional unwrapping methods, which have more meaning compared to
