@@ -37,6 +37,8 @@ where
     /// let x: Result<u32, &str> = Err("emergency failure");
     /// x.todo(); // panics with `not yet implemented: emergency failure`
     /// ```
+    #[track_caller]
+    #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     fn todo(self) -> T;
 
     /// Returns the contained [`Ok`] value, consuming the `self` value.
@@ -141,6 +143,8 @@ pub trait OptionExt<T> {
     /// let x: Option<u32> = None;
     /// x.todo(); // panics with `not yet implemented: None`
     /// ```
+    #[track_caller]
+    #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     fn todo(self) -> T;
 
     /// Returns the contained [`Some`] value, consuming the `self` value.
@@ -162,6 +166,7 @@ pub trait OptionExt<T> {
     /// let x: Option<u32> = None;
     /// x.assured("always set"); // panics with `the value was assured to exist but was None: always set`
     /// ```
+    #[track_caller]
     fn assured(self, reason: &str) -> T;
 
     /// Returns the contained [`Some`] value, consuming the `self` value.
@@ -184,6 +189,7 @@ pub trait OptionExt<T> {
     /// let x: Option<u32> = None;
     /// x.verified("should always be Some"); // panics with `it was verified that value presents but None was returned: should always be Some`
     /// ```
+    #[track_caller]
     fn verified(self, reason: &str) -> T;
 }
 
