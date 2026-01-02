@@ -100,18 +100,24 @@ where
     #[inline]
     #[track_caller]
     fn assured(self, reason: &str) -> T {
-        self.unwrap_or_else(|_| {
+        if let Ok(ok) = self {
+            ok
+        } else {
             panic!(
                 "the success was expected to be assured, but the error was returned: {}",
                 reason
-            )
-        })
+            );
+        }
     }
 
     #[inline]
     #[track_caller]
     fn verified(self, reason: &str) -> T {
-        self.unwrap_or_else(|_| panic!("the success was expected to be verified in the code earlier, but the error was returned: {}", reason))
+        if let Ok(ok) = self {
+            ok
+        } else {
+            panic!("the success was expected to be verified in the code earlier, but the error was returned: {}", reason);
+        }
     }
 }
 
@@ -197,18 +203,24 @@ impl<T> OptionExt<T> for Option<T> {
     #[inline]
     #[track_caller]
     fn assured(self, reason: &str) -> T {
-        self.unwrap_or_else(|| panic!("the value was assured to exist but was None: {}", reason))
+        if let Some(some) = self {
+            some
+        } else {
+            panic!("the value was assured to exist but was None: {}", reason);
+        }
     }
 
     #[inline]
     #[track_caller]
     fn verified(self, reason: &str) -> T {
-        self.unwrap_or_else(|| {
+        if let Some(some) = self {
+            some
+        } else {
             panic!(
                 "it was verified that value presents but None was returned: {}",
                 reason
-            )
-        })
+            );
+        }
     }
 }
 
