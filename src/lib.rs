@@ -116,7 +116,10 @@ where
         if let Ok(ok) = self {
             ok
         } else {
-            panic!("the success was expected to be verified in the code earlier, but the error was returned: {}", reason);
+            panic!(
+                "the success was expected to be verified in the code earlier, but the error was returned: {}",
+                reason
+            );
         }
     }
 }
