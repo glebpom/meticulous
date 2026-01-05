@@ -1,6 +1,6 @@
 [package]
 name = "meticulous"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "Result extension to add more meaning to unwrapping"
 keywords = ["result", "unwrap", "expect", "error", "error-handling"]
