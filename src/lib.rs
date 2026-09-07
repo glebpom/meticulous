@@ -17,9 +17,10 @@ where
     /// Use this method to indicate that it should be replaced with
     /// a better implementation later.
     ///
-    /// If `disallow-todo-on-release` feature is used, then the compilation
-    /// will fail if `debug_assertions` are turned off (typically on a release
-    /// build).
+    /// This method is unavailable when the `disallow-todo-on-release` feature
+    /// is enabled and this crate is compiled with `debug_assertions` disabled
+    /// (typically in release builds). Calls to it then fail to compile;
+    /// [`ResultExt::assured`] and [`ResultExt::verified`] remain available.
     ///
     /// # Panics
     ///
@@ -31,12 +32,16 @@ where
     ///
     /// Basic usage:
     ///
-    /// ```should_panic
+    // rustdoc can enable debug assertions for examples even when the library
+    // disables them. Unit and consumer compilation tests cover feature builds.
+    #[cfg_attr(feature = "disallow-todo-on-release", doc = "```ignore")]
+    #[cfg_attr(not(feature = "disallow-todo-on-release"), doc = "```should_panic")]
     /// use meticulous::ResultExt;
     ///
     /// let x: Result<u32, &str> = Err("emergency failure");
-    /// x.todo(); // panics with `not yet implemented: emergency failure`
+    /// x.todo(); // panics with `not yet implemented: "emergency failure"`
     /// ```
+    #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     fn todo(self) -> T;
 
     /// Returns the contained [`Ok`] value, consuming the `self` value.
@@ -58,7 +63,7 @@ where
     /// use meticulous::ResultExt;
     ///
     /// let x: Result<u32, &str> = Err("emergency failure");
-    /// x.assured("always true for 64-bit apps"); // panics with `the success was expected to be assured, but the error was returned: always true for 64-bit apps: emergency failure`
+    /// x.assured("always true for 64-bit apps"); // panics with `the success was expected to be assured, but the error was returned: always true for 64-bit apps: "emergency failure"`
     /// ```
     fn assured(self, reason: &str) -> T;
 
@@ -81,7 +86,7 @@ where
     /// use meticulous::ResultExt;
     ///
     /// let x: Result<u32, &str> = Err("emergency failure");
-    /// x.verified("boundaries already checked"); // panics with `the success was expected to be verified in the code earlier, but the error was returned: boundaries already checked: emergency failure`
+    /// x.verified("boundaries already checked"); // panics with `the success was expected to be verified in the code earlier, but the error was returned: boundaries already checked: "emergency failure"`
     /// ```
     fn verified(self, reason: &str) -> T;
 }
@@ -100,26 +105,22 @@ where
     #[inline]
     #[track_caller]
     fn assured(self, reason: &str) -> T {
-        if let Ok(ok) = self {
-            ok
-        } else {
-            panic!(
-                "the success was expected to be assured, but the error was returned: {}",
-                reason
-            );
+        match self {
+            Ok(ok) => ok,
+            Err(error) => panic!(
+                "the success was expected to be assured, but the error was returned: {reason}: {error:?}"
+            ),
         }
     }
 
     #[inline]
     #[track_caller]
     fn verified(self, reason: &str) -> T {
-        if let Ok(ok) = self {
-            ok
-        } else {
-            panic!(
-                "the success was expected to be verified in the code earlier, but the error was returned: {}",
-                reason
-            );
+        match self {
+            Ok(ok) => ok,
+            Err(error) => panic!(
+                "the success was expected to be verified in the code earlier, but the error was returned: {reason}: {error:?}"
+            ),
         }
     }
 }
@@ -131,9 +132,10 @@ pub trait OptionExt<T> {
     /// Use this method to indicate that it should be replaced with
     /// a better implementation later.
     ///
-    /// If `disallow-todo-on-release` feature is used, then the compilation
-    /// will fail if `debug_assertions` are turned off (typically on a release
-    /// build).
+    /// This method is unavailable when the `disallow-todo-on-release` feature
+    /// is enabled and this crate is compiled with `debug_assertions` disabled
+    /// (typically in release builds). Calls to it then fail to compile;
+    /// [`OptionExt::assured`] and [`OptionExt::verified`] remain available.
     ///
     /// # Panics
     ///
@@ -144,12 +146,14 @@ pub trait OptionExt<T> {
     ///
     /// Basic usage:
     ///
-    /// ```should_panic
+    #[cfg_attr(feature = "disallow-todo-on-release", doc = "```ignore")]
+    #[cfg_attr(not(feature = "disallow-todo-on-release"), doc = "```should_panic")]
     /// use meticulous::OptionExt;
     ///
     /// let x: Option<u32> = None;
-    /// x.todo(); // panics with `not yet implemented: None`
+    /// x.todo(); // panics with `not yet implemented`
     /// ```
+    #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     fn todo(self) -> T;
 
     /// Returns the contained [`Some`] value, consuming the `self` value.
@@ -181,7 +185,7 @@ pub trait OptionExt<T> {
     /// # Panics
     ///
     /// Panics if the value is [`None`], with message "it was verified that value presents but None was returned",
-    /// and the content of the [`Err`].
+    /// followed by the supplied reason.
     ///
     /// # Examples
     ///
@@ -231,32 +235,40 @@ impl<T> OptionExt<T> for Option<T> {
 mod tests {
     use super::*;
 
+    #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "not yet implemented: \"emergency failure\"")]
     fn test_result_todo() {
-        u16::try_from(i32::MAX).todo();
+        Err::<u32, _>("emergency failure").todo();
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(
+        expected = "the success was expected to be assured, but the error was returned: always ok on linux: \"emergency failure\""
+    )]
     fn test_result_assured() {
-        u16::try_from(i32::MAX).assured("always ok on linux");
+        Err::<u32, _>("emergency failure").assured("always ok on linux");
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(
+        expected = "the success was expected to be verified in the code earlier, but the error was returned: boundaries already checked: \"emergency failure\""
+    )]
     fn test_result_verified() {
-        u16::try_from(i32::MAX).verified("boundaries already checked");
+        Err::<u32, _>("emergency failure").verified("boundaries already checked");
     }
 
+    #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "not yet implemented")]
     fn test_option_todo() {
         "hello".strip_prefix("a").todo();
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(
+        expected = "the value was assured to exist but was None: string always starts with a"
+    )]
     fn test_option_assured() {
         "hello"
             .strip_prefix("a")
@@ -264,10 +276,28 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(
+        expected = "it was verified that value presents but None was returned: string prefix was already checked"
+    )]
     fn test_option_verified() {
         "hello"
             .strip_prefix("a")
             .verified("string prefix was already checked");
+    }
+
+    #[test]
+    fn test_result_success() {
+        assert_eq!(Ok::<_, ()>(42).assured("value exists"), 42);
+        assert_eq!(Ok::<_, ()>(42).verified("value checked"), 42);
+        #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
+        assert_eq!(Ok::<_, ()>(42).todo(), 42);
+    }
+
+    #[test]
+    fn test_option_success() {
+        assert_eq!(Some(42).assured("value exists"), 42);
+        assert_eq!(Some(42).verified("value checked"), 42);
+        #[cfg(not(all(feature = "disallow-todo-on-release", not(debug_assertions))))]
+        assert_eq!(Some(42).todo(), 42);
     }
 }
