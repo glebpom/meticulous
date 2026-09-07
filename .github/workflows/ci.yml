@@ -69,17 +69,15 @@ jobs:
           args: -- -D warnings
 
   test:
-    name: ${{ matrix.name }}
+    # Branch protection requires these check names.
+    name: linux / ${{ matrix.rust }}
     needs: [style]
 
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        name:
-          - linux / stable
-          - linux / beta
-          # - linux / nightly
+        rust: [stable, beta]
 
     steps:
       - name: Checkout
@@ -88,22 +86,30 @@ jobs:
       - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust || 'stable' }}
-          target: ${{ matrix.target }}
+          toolchain: ${{ matrix.rust }}
           profile: minimal
           override: true
 
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: ${{ matrix.features }}
+      - name: Test targets and documentation
+        shell: bash
+        run: |
+          for profile in debug release; do
+            for features in default all; do
+              echo "Testing ${profile} with ${features} features"
+              args=()
+              if [[ "$profile" == release ]]; then
+                args+=(--release)
+              fi
+              if [[ "$features" == all ]]; then
+                args+=(--all-features)
+              fi
+              cargo test --all-targets "${args[@]}"
+              cargo test --doc "${args[@]}"
+            done
+          done
 
-      - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: ${{ matrix.features }} ${{ matrix.test-features }}
+      - name: Check consumer compilation
+        run: python3 tests/check_todo_compilation.py
 
   docs:
     name: Docs
